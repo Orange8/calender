@@ -65,6 +65,7 @@ export default {
       return this.monthDate = [31, 28+this.isLeapear, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     },
     $fillingDate() {
+      // debugger;
       let firstDay_week = new Date(this.thisYear, this.thisMonth-1, 1).getDay()+1;
       let passDay = firstDay_week - 1;
       let futureDay = '';
@@ -74,15 +75,19 @@ export default {
         // 判断本月一号是否为第一天
         if (i < firstDay_week) {
           passDay--;
+          let lastMonth = '';
+          this.thisMonth-2<0?lastMonth=(this.thisMonth-2==-2?12:11):lastMonth=this.thisMonth-2;
           let data = {
             id: 'past',
-            value: this.monthDate[this.thisMonth - 1] - passDay
+            value: this.monthDate[lastMonth] - passDay
           }
           this.calenderDate.push(data);
         } else {
           ++num;
           // 将下月日期填充到剩余空格
-          if (num > this.monthDate[this.thisMonth - 1]) {
+          let lastMonth = '';
+          this.thisMonth-1<0?lastMonth=11:lastMonth=(this.thisMonth-1);
+          if (num > this.monthDate[lastMonth]) {
             ++num1;
             let data = {
               id: 'future',
@@ -138,6 +143,7 @@ export default {
       this.thisMonth--;
       if (this.thisMonth == 0) {
         this.thisMonth = 12;
+        this.thisYear--
       }
       this.$isLeapear(this.thisYear);
       this.$fillingDate();
@@ -149,6 +155,7 @@ export default {
       this.thisMonth++;
       if (this.thisMonth == 13) {
         this.thisMonth = 1;
+        this.thisYear++;
       }
       this.$isLeapear(this.thisYear);
       this.$fillingDate();
