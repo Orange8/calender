@@ -16,13 +16,13 @@
       </span>
     </div>
     <div class="weeks">
-      <span>日</span>
+      <span class="weekends">日</span>
       <span>一</span>
       <span>二</span>
       <span>三</span>
       <span>四</span>
       <span>五</span>
-      <span>六</span>
+      <span class="weekends">六</span>
     </div>
     <div
         v-for="(items, index) in calenderDateList"
@@ -30,9 +30,12 @@
     >
       <span
         v-for="(item, index) in items"
-        :key="item.id"
         :class="item.id"
-      >{{item.value}}</span>
+      >
+        <i v-if="item.signIn" class="signIn">签</i>
+        <i v-if="item.holiday" class="holiday">休</i>
+        {{item.day}}
+      </span>
     </div>
   </div>
 </template>
@@ -49,14 +52,17 @@ export default {
       thisYear: new Date().getFullYear(),
       thisMonth: new Date().getMonth()+1,
       isLeapear: 0,
-      monthDate: [],
+      monthDate: [], // 今年月份列表
       calenderDate: [],
       calenderDateList: [],
+      signList: [1509206400000, 1509379200000,1509811200000, 1510243200000], //已签到日期列表
+      holidayList: [1509206400000, 1506787200000, 1506873600000, 1506960000000, 1507046400000, 1507132800000, 1507219200000, 1507305600000] // 节假日日期列表
     }
   },
   created() {
     this.$isLeapear(this.thisYear);
     this.$fillingDate();
+    // console.log(this.holidayList);
   },
   methods: {
     // 判断是否为闰年
@@ -74,39 +80,70 @@ export default {
       for (let i = 1; i <= 42; i++) {
         // 判断本月一号是否为第一天
         if (i < firstDay_week) {
+          // 将上月日期填充到空格
           passDay--;
           let lastMonth = '';
+          let thisYear = '';
+          let thisMonth = '';
+          let thisDay = '';
           this.thisMonth-2<0?lastMonth=(this.thisMonth-2==-2?12:11):lastMonth=this.thisMonth-2;
+          this.thisMonth == 1 ? thisYear = this.thisYear - 1 : thisYear = this.thisYear;
+          this.thisMonth == 1 ? thisMonth = 12 : thisMonth = this.thisMonth - 1;
+          thisDay = this.monthDate[lastMonth] - passDay;
           let data = {
             id: 'past',
-            value: this.monthDate[lastMonth] - passDay
+            year: thisYear,
+            month: thisMonth,
+            day: thisDay
           }
+          //判断节假日及签到日期
+          specialDate(this.signList, this.holidayList, thisYear, thisMonth, thisDay, data);
+          // debugger;
           this.calenderDate.push(data);
         } else {
           ++num;
           // 将下月日期填充到剩余空格
-          let lastMonth = '';
-          this.thisMonth-1<0?lastMonth=11:lastMonth=(this.thisMonth-1);
-          if (num > this.monthDate[lastMonth]) {
+          let nextMonth = '';
+          let thisYear = '';
+          let thisMonth = '';
+          this.thisMonth-1<0?nextMonth=11:nextMonth=(this.thisMonth-1);
+          this.thisMonth == 12 ? thisYear = this.thisYear + 1 : thisYear = this.thisYear;
+          this.thisMonth == 12 ? thisMonth = 1 : thisMonth = this.thisMonth + 1;
+          if (num > this.monthDate[nextMonth]) {
             ++num1;
             let data = {
               id: 'future',
-              value: num1
+              year: thisYear,
+              month: thisMonth,
+              day: num1
             }
+            //判断节假日及签到日期
+            specialDate(this.signList, this.holidayList, thisYear, thisMonth, num1, data);
+            // debugger;
             this.calenderDate.push(data);
           } else {
             // 判断是否为今天
             if (this.thisYear == this.today_year && this.thisMonth == this.today_month && num == this.today) {
               let data = {
                 id: 'today',
-                value: num
+                year: this.thisYear,
+                month: this.thisMonth,
+                day: num
               }
+              //判断节假日及签到日期
+              specialDate(this.signList, this.holidayList, this.thisYear, this.thisMonth, num, data);
+              // debugger;
               this.calenderDate.push(data);
             } else {
               let data = {
                 id: 'now',
-                value: num
+                year: this.thisYear,
+                month: this.thisMonth,
+                day: num
               }
+              //判断节假日及签到日期
+              specialDate(this.signList, this.holidayList, this.thisYear, this.thisMonth, num, data);
+              // debugger;
               this.calenderDate.push(data);
             }
           }
@@ -114,11 +151,39 @@ export default {
         if (i%7 == 0) {
           let dataList = {};
           dataList = this.calenderDate;
-          // console.log(dataList);
+          //添加周末标识
+          dataList[0].weekends = true;
+          dataList[dataList.length-1].weekends = true;
+          dataList[0].id = dataList[0].id + ' weekends';
+          dataList[dataList.length-1].id = dataList[dataList.length-1].id + ' weekends';
+          console.log(dataList);
           this.calenderDateList.push(dataList);
           this.calenderDate = [];
         }
       }
+      function specialDate(signList, holidayList, thisYear, thisMonth, thisDay, data) {
+        //判断已签到的日期
+        for (let s = 0; s < signList.length; s++) {
+          // debugger;
+          let d = new Date();
+          d.setTime(signList[s]);
+          if (thisYear == (d.getFullYear()) && thisMonth == (d.getMonth()+1) && thisDay == (d.getDate())) {
+            data.id = data.id + ' signIn';
+            data.signIn = true;
+          }
+        }
+        //判断节假日
+        for (let h = 0; h < holidayList.length; h++) {
+          // debugger;
+          let d = new Date();
+          d.setTime(holidayList[h]);
+          if (thisYear == (d.getFullYear()) && thisMonth == (d.getMonth()+1) && thisDay == (d.getDate())) {
+            data.id = data.id + ' holiday';
+            data.holiday = true;
+          }
+        }
+      }
+      console.log(this.calenderDateList);
     },
     // 去年
     $pastYear() {
@@ -216,23 +281,56 @@ export default {
       border-right: 1px solid #ddd;
       border-bottom: 1px solid #ddd;
       border-top: 1px solid #ddd;
+      &.weekends{
+        color: #e02d2d;
+      }
     }
   }
   .date{
     display: flex;
     border-left: 1px solid #ddd;
     span{
+      position: relative;
       flex: 1;
       line-height: 50px;
       border-right: 1px solid #ddd;
       border-bottom: 1px solid #ddd;
       color: #000;
-      &.past, &.future{
-        color: #999;
-      }
+      font-weight: bold;
       &.today{
-        color: #fd614c;
+        color: #fff;
+        background-color: #ffb207;
         font-weight: bold;
+      }
+      &.weekends{
+        color: #e02d2d;
+      }
+      &.past, &.future{
+        color: #b7b7b7;
+      }
+      &.signIn{
+        i.signIn{
+          display: inline-block;
+          position: absolute;
+          left: 0;
+          top: 10px;
+          color: #e02d2d;
+          font-weight: bold;
+          font-style: normal;
+          line-height: 0;
+        }
+      }
+      &.holiday{
+        i.holiday{
+          display: inline-block;
+          position: absolute;
+          right: 0;
+          top: 10px;
+          color: #e02d2d;
+          font-weight: bold;
+          font-style: normal;
+          line-height: 0;
+        }
       }
     }
   }
