@@ -70,6 +70,7 @@ export default {
       year%100==0?this.isLeapear=(year%400==0?1:0):this.isLeapear=(year%4==0?1:0)
       return this.monthDate = [31, 28+this.isLeapear, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     },
+    // 填充日历
     $fillingDate() {
       // debugger;
       let firstDay_week = new Date(this.thisYear, this.thisMonth-1, 1).getDay()+1;
@@ -97,7 +98,7 @@ export default {
             day: thisDay
           }
           //判断节假日及签到日期
-          specialDate(this.signList, this.holidayList, thisYear, thisMonth, thisDay, data);
+          this.$specialDate(this.signList, this.holidayList, thisYear, thisMonth, thisDay, data);
           // debugger;
           this.calenderDate.push(data);
         } else {
@@ -118,7 +119,7 @@ export default {
               day: num1
             }
             //判断节假日及签到日期
-            specialDate(this.signList, this.holidayList, thisYear, thisMonth, num1, data);
+            this.$specialDate(this.signList, this.holidayList, thisYear, thisMonth, num1, data);
             // debugger;
             this.calenderDate.push(data);
           } else {
@@ -131,7 +132,7 @@ export default {
                 day: num
               }
               //判断节假日及签到日期
-              specialDate(this.signList, this.holidayList, this.thisYear, this.thisMonth, num, data);
+              this.$specialDate(this.signList, this.holidayList, this.thisYear, this.thisMonth, num, data);
               // debugger;
               this.calenderDate.push(data);
             } else {
@@ -142,7 +143,7 @@ export default {
                 day: num
               }
               //判断节假日及签到日期
-              specialDate(this.signList, this.holidayList, this.thisYear, this.thisMonth, num, data);
+              this.$specialDate(this.signList, this.holidayList, this.thisYear, this.thisMonth, num, data);
               // debugger;
               this.calenderDate.push(data);
             }
@@ -161,29 +162,30 @@ export default {
           this.calenderDate = [];
         }
       }
-      function specialDate(signList, holidayList, thisYear, thisMonth, thisDay, data) {
-        //判断已签到的日期
-        for (let s = 0; s < signList.length; s++) {
-          // debugger;
-          let d = new Date();
-          d.setTime(signList[s]);
-          if (thisYear == (d.getFullYear()) && thisMonth == (d.getMonth()+1) && thisDay == (d.getDate())) {
-            data.id = data.id + ' signIn';
-            data.signIn = true;
-          }
-        }
-        //判断节假日
-        for (let h = 0; h < holidayList.length; h++) {
-          // debugger;
-          let d = new Date();
-          d.setTime(holidayList[h]);
-          if (thisYear == (d.getFullYear()) && thisMonth == (d.getMonth()+1) && thisDay == (d.getDate())) {
-            data.id = data.id + ' holiday';
-            data.holiday = true;
-          }
+      console.log(this.calenderDateList);
+    },
+    // 判断已签到的日期以及节假日
+    $specialDate(signList, holidayList, thisYear, thisMonth, thisDay, data) {
+      //判断已签到的日期
+      for (let s = 0; s < signList.length; s++) {
+        // debugger;
+        let d = new Date();
+        d.setTime(signList[s]);
+        if (thisYear == (d.getFullYear()) && thisMonth == (d.getMonth()+1) && thisDay == (d.getDate())) {
+          data.id = data.id + ' signIn';
+          data.signIn = true;
         }
       }
-      console.log(this.calenderDateList);
+      //判断节假日
+      for (let h = 0; h < holidayList.length; h++) {
+        // debugger;
+        let d = new Date();
+        d.setTime(holidayList[h]);
+        if (thisYear == (d.getFullYear()) && thisMonth == (d.getMonth()+1) && thisDay == (d.getDate())) {
+          data.id = data.id + ' holiday';
+          data.holiday = true;
+        }
+      }
     },
     // 去年
     $pastYear() {
