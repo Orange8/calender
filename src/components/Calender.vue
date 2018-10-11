@@ -25,13 +25,13 @@
       <span class="weekends">六</span>
     </div>
     <div
-        v-for="(items, index) in calenderDateList"
-        class="date"
-    >
+      v-for="(items, index) in calenderDateList"
+      :key="index"
+      class="date">
       <span
         v-for="(item, index) in items"
-        :class="item.id"
-      >
+        :key="index"
+        :class="item.id">
         <i v-if="item.signIn" class="signIn">签</i>
         <i v-if="item.holiday" class="holiday">休</i>
         {{item.day}}
